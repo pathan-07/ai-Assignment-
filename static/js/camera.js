@@ -30,6 +30,16 @@ function initCamera() {
         return;
     }
     
+    // Check if getUserMedia is supported
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        if (cameraError) {
+            cameraError.textContent = 'Camera access is not supported in this browser or environment. Try using Chrome or Firefox.';
+            cameraError.style.display = 'block';
+        }
+        showFallbackUI();
+        return;
+    }
+    
     // Get access to the camera
     navigator.mediaDevices.getUserMedia(constraints)
         .then((stream) => {
@@ -40,10 +50,65 @@ function initCamera() {
         .catch((err) => {
             console.error('Error accessing camera: ', err);
             if (cameraError) {
-                cameraError.textContent = 'Error accessing camera: ' + err.message;
+                cameraError.textContent = 'Error accessing camera: ' + (err.message || 'Camera permission denied or device not available');
                 cameraError.style.display = 'block';
             }
+            showFallbackUI();
         });
+}
+
+// Show fallback UI when camera is not available
+function showFallbackUI() {
+    if (cameraContainer) cameraContainer.style.display = 'none';
+    if (previewContainer) previewContainer.style.display = 'block';
+    
+    // Create a message to inform user about alternative options
+    const fallbackMsg = document.createElement('div');
+    fallbackMsg.className = 'alert alert-info mt-3';
+    fallbackMsg.innerHTML = '<strong>Camera not available.</strong> You can upload an image file instead:';
+    
+    // Create a file input for manual image upload
+    const fileInput = document.createElement('input');
+    fileInput.type = 'file';
+    fileInput.accept = 'image/*';
+    fileInput.className = 'form-control mt-3';
+    fileInput.addEventListener('change', handleFileUpload);
+    
+    // Add elements to the preview container
+    if (previewContainer) {
+        previewContainer.appendChild(fallbackMsg);
+        previewContainer.appendChild(fileInput);
+    }
+}
+
+// Handle file upload when camera is not available
+function handleFileUpload(event) {
+    const file = event.target.files[0];
+    if (!file || !file.type.match('image.*')) {
+        alert('Please select an image file.');
+        return;
+    }
+    
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        // Draw the uploaded image on canvas
+        const img = new Image();
+        img.onload = function() {
+            if (!canvas) return;
+            
+            const context = canvas.getContext('2d');
+            canvas.width = img.width;
+            canvas.height = img.height;
+            context.drawImage(img, 0, 0);
+            
+            // Get data URL and store in hidden input
+            if (imageData) {
+                imageData.value = canvas.toDataURL('image/jpeg');
+            }
+        };
+        img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
 }
 
 // Show camera UI and hide preview

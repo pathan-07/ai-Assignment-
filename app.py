@@ -53,14 +53,46 @@ def analyze():
         try:
             # Get image data from the form
             image_data = request.form['image_data']
-            # Remove the data URL prefix
-            image_data = image_data.split(',')[1]
+            
+            if not image_data:
+                flash('No image data received. Please capture an image first.', 'danger')
+                return redirect(url_for('analyze'))
+                
+            # Check if data URL prefix exists and handle accordingly
+            if ',' in image_data:
+                # Remove the data URL prefix
+                image_data = image_data.split(',')[1]
+            
+            # Log for debugging
+            logger.debug(f"Image data length: {len(image_data)}")
+            
             # Decode base64 image
-            image_bytes = base64.b64decode(image_data)
-            # Convert to numpy array
-            nparr = np.frombuffer(image_bytes, np.uint8)
-            # Decode image
-            image = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+            try:
+                image_bytes = base64.b64decode(image_data)
+                if len(image_bytes) == 0:
+                    flash('Received empty image. Please try again.', 'warning')
+                    return redirect(url_for('analyze'))
+                    
+                # Log success
+                logger.debug(f"Successfully decoded base64 data, length: {len(image_bytes)}")
+                
+                # Convert to numpy array
+                nparr = np.frombuffer(image_bytes, np.uint8)
+                
+                # Decode image
+                image = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+                
+                if image is None:
+                    flash('Failed to decode image. Please try again with a different image.', 'warning')
+                    return redirect(url_for('analyze'))
+                
+                # Log success
+                logger.debug(f"Successfully decoded image, shape: {image.shape}")
+                
+            except Exception as e:
+                logger.error(f"Error decoding image: {str(e)}")
+                flash(f'Error decoding image: {str(e)}', 'danger')
+                return redirect(url_for('analyze'))
             
             # Extract text using OCR
             extracted_text = extract_text_from_image(image)
