@@ -1,0 +1,63 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <h3 class="mb-0"><i class="fas fa-camera me-2"></i>Analyze Handwritten Assignment</h3>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>
+                    Position your handwritten assignment in good lighting and capture a clear image.
+                </div>
+                
+                <form id="analyze-form" action="{{ url_for('analyze') }}" method="post">
+                    <!-- Hidden field to store image data -->
+                    <input type="hidden" id="image-data" name="image_data">
+                    
+                    <!-- Camera view -->
+                    <div id="camera-container" class="camera-container mb-4">
+                        <video id="player" autoplay playsinline></video>
+                        <div class="camera-controls">
+                            <button type="button" id="capture-button" class="btn btn-primary mt-3">
+                                <i class="fas fa-camera me-2"></i>Capture Image
+                            </button>
+                        </div>
+                        <div id="camera-error" class="alert alert-danger mt-3" style="display: none;"></div>
+                    </div>
+                    
+                    <!-- Preview container (hidden initially) -->
+                    <div id="preview-container" class="preview-container mb-4" style="display: none;">
+                        <canvas id="canvas"></canvas>
+                        <div class="d-flex mt-3">
+                            <button type="button" id="retake-button" class="btn btn-secondary me-2">
+                                <i class="fas fa-redo me-2"></i>Retake
+                            </button>
+                            <button type="submit" class="btn btn-success">
+                                <i class="fas fa-check me-2"></i>Analyze
+                            </button>
+                        </div>
+                    </div>
+                </form>
+                
+                <div class="mt-4">
+                    <h4>Tips for Better Results:</h4>
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item bg-dark">Write clearly and legibly for best OCR accuracy.</li>
+                        <li class="list-group-item bg-dark">Ensure good lighting conditions when capturing the image.</li>
+                        <li class="list-group-item bg-dark">Position the paper so it fills most of the camera frame.</li>
+                        <li class="list-group-item bg-dark">Avoid shadows or glare on the paper.</li>
+                        <li class="list-group-item bg-dark">Make sure your device has permission to access the camera.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/camera.js') }}"></script>
+{% endblock %}

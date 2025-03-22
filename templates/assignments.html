@@ -1,0 +1,78 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12 mb-4">
+        <h2 class="section-title">
+            <i class="fas fa-history me-2"></i>Assignment History
+        </h2>
+    </div>
+    
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header bg-primary">
+                <h3 class="mb-0">Previous Assignments</h3>
+            </div>
+            <div class="card-body">
+                {% if assignments %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th scope="col">#</th>
+                                    <th scope="col">Date</th>
+                                    <th scope="col">Reference</th>
+                                    <th scope="col">Score</th>
+                                    <th scope="col">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for assignment in assignments %}
+                                    <tr>
+                                        <th scope="row">{{ assignment.id }}</th>
+                                        <td>{{ assignment.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                                        <td>
+                                            {% if assignment.reference %}
+                                                {{ assignment.reference.title }}
+                                            {% else %}
+                                                <span class="text-muted">Not available</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <div class="me-2">{{ assignment.score }}</div>
+                                                {% if assignment.score >= 70 %}
+                                                    <span class="badge bg-success">High</span>
+                                                {% elif assignment.score >= 40 %}
+                                                    <span class="badge bg-warning">Medium</span>
+                                                {% else %}
+                                                    <span class="badge bg-danger">Low</span>
+                                                {% endif %}
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <a href="{{ url_for('assignment_detail', id=assignment.id) }}" class="btn btn-sm btn-info">
+                                                <i class="fas fa-eye me-1"></i> View
+                                            </a>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        No assignments have been analyzed yet.
+                    </div>
+                    <div class="text-center mt-3">
+                        <a href="{{ url_for('analyze') }}" class="btn btn-primary">
+                            <i class="fas fa-camera me-2"></i>Analyze an Assignment
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
